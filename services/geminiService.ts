@@ -1,11 +1,14 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { ProjectAnalysis } from '../types';
 
-if (!process.env.API_KEY) {
-  throw new Error("API_KEY environment variable is not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Sử dụng một hàm để khởi tạo nhằm trì hoãn việc kiểm tra API key
+const getAiClient = (): GoogleGenAI => {
+  if (!process.env.API_KEY) {
+    // Lỗi này sẽ được bắt bởi hàm gọi và hiển thị cho người dùng.
+    throw new Error("Lỗi cấu hình: API_KEY chưa được thiết lập. Vui lòng đảm bảo biến môi trường API_KEY đã được định cấu hình đúng cách khi chạy ứng dụng.");
+  }
+  return new GoogleGenAI({ apiKey: process.env.API_KEY });
+};
 
 const analysisSchema = {
   type: Type.OBJECT,
@@ -26,6 +29,8 @@ const analysisSchema = {
 
 export const analyzeProject = async (projectName: string, projectLink: string): Promise<ProjectAnalysis> => {
   try {
+    const ai = getAiClient(); // Khởi tạo và kiểm tra API key ở đây
+
     const prompt = `Phân tích dự án tiền điện tử có tên "${projectName}". Trang web/tài nguyên chính: ${projectLink}. Cung cấp một phân tích đầu tư ngắn gọn nhưng toàn diện. Đánh giá các yếu tố sau: Tình trạng, Điểm mạnh, Điểm yếu, Tiềm năng, Tiềm năng đầu tư (ví dụ: Cao, Trung bình, Thấp kèm giải thích), Rủi ro, Người sáng lập và Đội ngũ, Tokenomics, và Cộng đồng/Hệ sinh thái. Trả về kết quả phân tích dưới dạng một đối tượng JSON duy nhất.`;
 
     const response = await ai.models.generateContent({
@@ -41,7 +46,7 @@ export const analyzeProject = async (projectName: string, projectLink: string): 
     const jsonText = response.text.trim();
     const parsedData = JSON.parse(jsonText);
     
-    // Ensure the project name from input is used, as model might slightly alter it.
+    // Đảm bảo tên dự án từ đầu vào được sử dụng, vì mô hình có thể thay đổi nhẹ.
     parsedData.projectName = projectName;
 
     return parsedData as ProjectAnalysis;
@@ -49,8 +54,11 @@ export const analyzeProject = async (projectName: string, projectLink: string): 
   } catch (error) {
     console.error("Error analyzing project:", error);
     if (error instanceof Error) {
-        throw new Error(`Failed to analyze project with Gemini API: ${error.message}`);
+        // Ném lại lỗi để được bắt bởi thành phần UI.
+        // Điều này bao gồm cả lỗi API key thân thiện với người dùng từ getAiClient.
+        throw error;
     }
-    throw new Error("An unknown error occurred during project analysis.");
+    // Đối với các đối tượng không phải là Error được ném ra
+    throw new Error("Đã xảy ra lỗi không xác định trong quá trình phân tích dự án.");
   }
 };
