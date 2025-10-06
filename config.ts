@@ -1,19 +1,6 @@
 /**
  * DÀNH CHO NHÀ PHÁT TRIỂN:
  * -----------------------------------------------------------------------------
- * GEMINI API KEY
- *
- * Để gán trực tiếp API key cho Gemini AI mà không cần nhập trên giao diện,
- * hãy dán key của bạn vào biến `GEMINI_API_KEY`.
- *
- * QUAN TRỌNG: Nếu bạn chia sẻ mã nguồn này, hãy đảm bảo bạn không đưa key của mình vào đây.
- *
- * Ưu tiên: Key nhập trên giao diện (lưu trong localStorage) sẽ được ưu tiên hơn key này.
- */
-export const GEMINI_API_KEY = "AIzaSyB1GORdv4KTRyJ05N3Rxwaq-sRzVRKkbz8"; // <-- DÁN API KEY GEMINI CỦA BẠN VÀO ĐÂY
-
-/**
- * -----------------------------------------------------------------------------
  * GOOGLE SHEETS API CONFIGURATION
  * 
  * Để sử dụng tính năng tích hợp Google Sheets, bạn cần cung cấp
@@ -31,6 +18,7 @@ export const GEMINI_API_KEY = "AIzaSyB1GORdv4KTRyJ05N3Rxwaq-sRzVRKkbz8"; // <-- 
  *       - Sao chép "Your Client ID" và dán vào `GOOGLE_CLIENT_ID`.
  * -----------------------------------------------------------------------------
  */
+// Fix: Removed GEMINI_API_KEY as it is no longer used. The API key should be set as an environment variable.
 export const GOOGLE_API_KEY = "AIzaSyDO9FGGLjIl4iXbQbjhlnx2WK0QUTynUsM"; // <-- DÁN GOOGLE API KEY (cho Sheets, Picker)
 export const GOOGLE_CLIENT_ID = "885745592637-6hqd03qh8qsrbis5cserclsk93svm6jr.apps.googleusercontent.com"; // <-- DÁN GOOGLE OAUTH 2.0 CLIENT ID
 

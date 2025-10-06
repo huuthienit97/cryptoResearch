@@ -1,4 +1,3 @@
-
 export interface ProjectAnalysis {
   status: string;
   projectName: string;
@@ -12,6 +11,7 @@ export interface ProjectAnalysis {
   communityAndEcosystem: string;
 }
 
+// Fix: Added missing SelectedSheet interface.
 export interface SelectedSheet {
   id: string;
   name: string;
