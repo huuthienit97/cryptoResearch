@@ -18,7 +18,7 @@ const analysisSchema = {
   required: ["status", "projectName", "strengths", "weaknesses", "potential", "investmentPotential", "risks", "founderAndTeam", "tokenomics", "communityAndEcosystem"]
 };
 
-export const analyzeProject = async (projectName: string, projectLink: string, apiKey: string): Promise<ProjectAnalysis> => {
+export const analyzeProject = async (projectName: string, projectLinks: string, apiKey: string): Promise<ProjectAnalysis> => {
   if (!apiKey) {
     throw new Error("API Key của Google AI chưa được cung cấp. Vui lòng nhập API Key của bạn.");
   }
@@ -26,7 +26,7 @@ export const analyzeProject = async (projectName: string, projectLink: string, a
   try {
     const ai = new GoogleGenAI({ apiKey });
 
-    const prompt = `Phân tích dự án tiền điện tử có tên "${projectName}". Trang web/tài nguyên chính: ${projectLink}. Cung cấp một phân tích đầu tư ngắn gọn nhưng toàn diện. Đánh giá các yếu tố sau: Tình trạng, Điểm mạnh, Điểm yếu, Tiềm năng, Tiềm năng đầu tư (ví dụ: Cao, Trung bình, Thấp kèm giải thích), Rủi ro, Người sáng lập và Đội ngũ, Tokenomics, và Cộng đồng/Hệ sinh thái. Trả về kết quả phân tích dưới dạng một đối tượng JSON duy nhất.`;
+    const prompt = `Phân tích dự án tiền điện tử có tên "${projectName}". Hãy sử dụng tất cả các nguồn thông tin được cung cấp dưới đây:\n${projectLinks}\n\nCung cấp một phân tích đầu tư ngắn gọn nhưng toàn diện. Đánh giá các yếu tố sau: Tình trạng, Điểm mạnh, Điểm yếu, Tiềm năng, Tiềm năng đầu tư (ví dụ: Cao, Trung bình, Thấp kèm giải thích), Rủi ro, Người sáng lập và Đội ngũ, Tokenomics, và Cộng đồng/Hệ sinh thái. Trả về kết quả phân tích dưới dạng một đối tượng JSON duy nhất.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",

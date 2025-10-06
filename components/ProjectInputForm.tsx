@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 
 interface ProjectInputFormProps {
@@ -8,11 +7,11 @@ interface ProjectInputFormProps {
 
 const ProjectInputForm: React.FC<ProjectInputFormProps> = ({ onAnalyze, isLoading }) => {
   const [projectName, setProjectName] = useState('');
-  const [projectLink, setProjectLink] = useState('');
+  const [projectLinks, setProjectLinks] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAnalyze(projectName, projectLink);
+    onAnalyze(projectName, projectLinks);
   };
 
   return (
@@ -33,15 +32,15 @@ const ProjectInputForm: React.FC<ProjectInputFormProps> = ({ onAnalyze, isLoadin
           />
         </div>
         <div>
-          <label htmlFor="projectLink" className="block text-sm font-medium text-gray-300 mb-2">
-            Liên kết dự án (Website, Whitepaper, v.v.)
+          <label htmlFor="projectLinks" className="block text-sm font-medium text-gray-300 mb-2">
+            Liên kết dự án (mỗi link một dòng)
           </label>
-          <input
-            type="url"
-            id="projectLink"
-            value={projectLink}
-            onChange={(e) => setProjectLink(e.target.value)}
-            placeholder="https://ethereum.org"
+          <textarea
+            id="projectLinks"
+            rows={4}
+            value={projectLinks}
+            onChange={(e) => setProjectLinks(e.target.value)}
+            placeholder="https://example.com/website&#10;https://example.com/whitepaper"
             className="w-full bg-gray-900/50 border border-gray-600 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow duration-300"
             required
           />
