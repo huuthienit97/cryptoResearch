@@ -1,38 +1,43 @@
 
 import React, { useState, useEffect } from 'react';
-import { ProjectAnalysis } from './types';
+import { ProjectAnalysis, SelectedSheet } from './types';
 import { analyzeProject } from './services/geminiService';
-import { DEVELOPER_API_KEY } from './config';
+import { appendToSheet } from './services/googleSheetsService';
+import { GEMINI_API_KEY } from './config';
 import Header from './components/Header';
 import ProjectInputForm from './components/ProjectInputForm';
 import ApiKeyInput from './components/ApiKeyInput';
 import ResultsTable from './components/ResultsTable';
 import Loader from './components/Loader';
+import GoogleSheetConnector from './components/GoogleSheetConnector';
 
 const App: React.FC = () => {
   const [analysisResults, setAnalysisResults] = useState<ProjectAnalysis[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [geminiApiKey, setGeminiApiKey] = useState<string | null>(null);
   const [isKeyFromConfig, setIsKeyFromConfig] = useState<boolean>(false);
+  const [selectedSheet, setSelectedSheet] = useState<SelectedSheet | null>(null);
+  const [sheetStatus, setSheetStatus] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
 
   useEffect(() => {
     // Ưu tiên 1: Kiểm tra key trong localStorage
     const storedApiKey = localStorage.getItem('geminiApiKey');
     if (storedApiKey) {
-      setApiKey(storedApiKey);
+      setGeminiApiKey(storedApiKey);
       setIsKeyFromConfig(false);
     } 
     // Ưu tiên 2: Kiểm tra key trong file config
-    else if (DEVELOPER_API_KEY) {
-      setApiKey(DEVELOPER_API_KEY);
+    else if (GEMINI_API_KEY) {
+      setGeminiApiKey(GEMINI_API_KEY);
       setIsKeyFromConfig(true);
     }
   }, []);
 
   const handleApiKeySave = (key: string) => {
     localStorage.setItem('geminiApiKey', key);
-    setApiKey(key);
+    setGeminiApiKey(key);
     setIsKeyFromConfig(false);
     setError(null);
   };
@@ -40,31 +45,50 @@ const App: React.FC = () => {
   const handleChangeApiKey = () => {
     localStorage.removeItem('geminiApiKey');
     // Sau khi xóa, quay lại kiểm tra file config
-    if (DEVELOPER_API_KEY) {
-      setApiKey(DEVELOPER_API_KEY);
+    if (GEMINI_API_KEY) {
+      setGeminiApiKey(GEMINI_API_KEY);
       setIsKeyFromConfig(true);
     } else {
-      setApiKey(null);
+      setGeminiApiKey(null);
       setIsKeyFromConfig(false);
     }
   }
+  
+  const handleAppendToSheet = async (analysis: ProjectAnalysis, sheetId: string) => {
+    setSheetStatus(null);
+    try {
+      await appendToSheet(sheetId, analysis);
+      setSheetStatus({ message: `Đã thêm "${analysis.projectName}" vào Google Sheet thành công!`, type: 'success' });
+    } catch (error) {
+       console.error("Error appending to sheet:", error);
+       const errorMessage = error instanceof Error ? error.message : 'Lỗi không xác định.';
+       setSheetStatus({ message: `Không thể thêm vào Google Sheet: ${errorMessage}`, type: 'error' });
+    }
+  };
+
 
   const handleAnalyze = async (projectName: string, projectLink: string) => {
     if (!projectName.trim() || !projectLink.trim()) {
       setError('Vui lòng nhập Tên dự án và Liên kết dự án.');
       return;
     }
-    if (!apiKey) {
+    if (!geminiApiKey) {
       setError('Vui lòng nhập và lưu API Key của bạn trước khi phân tích.');
       return;
     }
 
     setIsLoading(true);
     setError(null);
+    setSheetStatus(null);
 
     try {
-      const result = await analyzeProject(projectName, projectLink, apiKey);
+      const result = await analyzeProject(projectName, projectLink, geminiApiKey);
       setAnalysisResults(prevResults => [result, ...prevResults]);
+
+      if (selectedSheet) {
+        await handleAppendToSheet(result, selectedSheet.id);
+      }
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định. Vui lòng thử lại.');
     } finally {
@@ -79,7 +103,7 @@ const App: React.FC = () => {
         
         <main className="mt-8 space-y-12">
           <div className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-2xl border border-gray-700">
-            {!apiKey ? (
+            {!geminiApiKey ? (
               <ApiKeyInput onSave={handleApiKeySave} />
             ) : (
               <div>
@@ -93,6 +117,8 @@ const App: React.FC = () => {
                   </button>
                 </div>
                 <ProjectInputForm onAnalyze={handleAnalyze} isLoading={isLoading} />
+                <hr className="border-gray-700 my-6" />
+                <GoogleSheetConnector onSheetSelect={setSelectedSheet} />
               </div>
             )}
           </div>
@@ -101,6 +127,12 @@ const App: React.FC = () => {
             <div className="bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-lg text-center" role="alert">
               <span className="font-bold">Lỗi: </span>
               <span>{error}</span>
+            </div>
+          )}
+
+          {sheetStatus && (
+             <div className={`border ${sheetStatus.type === 'success' ? 'bg-green-900/50 border-green-700 text-green-300' : 'bg-red-900/50 border-red-700 text-red-300'} px-4 py-3 rounded-lg text-center`} role="alert">
+              <span>{sheetStatus.message}</span>
             </div>
           )}
 

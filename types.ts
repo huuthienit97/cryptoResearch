@@ -11,3 +11,9 @@ export interface ProjectAnalysis {
   tokenomics: string;
   communityAndEcosystem: string;
 }
+
+export interface SelectedSheet {
+  id: string;
+  name: string;
+  url: string;
+}
