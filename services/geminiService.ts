@@ -9,8 +9,8 @@ const analysisSchemaProperties = {
     marketCap: { type: Type.STRING, description: "Vốn hóa thị trường hiện tại của dự án. Trả về 'Không có dữ liệu' nếu không tìm thấy." },
     currentPrice: { type: Type.STRING, description: "Giá token/coin hiện tại. Trả về 'Không có dữ liệu' nếu không tìm thấy." },
     volume24h: { type: Type.STRING, description: "Khối lượng giao dịch trong 24 giờ qua. Trả về 'Không có dữ liệu' nếu không tìm thấy." },
-    circulatingSupply: { type: Type.STRING, description: "Nguồn cung token/coin đang lưu hành. Trả về 'Không có dữ liệu' nếu không tìm thấy." },
-    totalSupply: { type: Type.STRING, description: "Tổng nguồn cung của token/coin. Trả về 'Không có dữ liệu' nếu không tìm thấy." },
+    circulatingSupply: { type: Type.STRING, description: "Nguồn cung token/coin đang lưu hành. Cung cấp con số và nếu có thể, ngày cập nhật. Trả về 'Không có dữ liệu' nếu không tìm thấy." },
+    totalSupply: { type: Type.STRING, description: "Tổng cung tối đa (Max Supply) và/hoặc tổng cung hiện tại (Total Supply). Ghi rõ loại cung cấp. Ví dụ: '8 tỷ (Tối đa), 1.7 tỷ (Hiện tại)'. Trả về 'Không có dữ liệu' nếu không tìm thấy." },
     ath: { type: Type.STRING, description: "Giá cao nhất mọi thời đại (ATH). Trả về 'Không có dữ liệu' nếu không tìm thấy." },
     strengths: { type: Type.STRING, description: "Những điểm mạnh chính của dự án." },
     weaknesses: { type: Type.STRING, description: "Những điểm yếu hoặc thách thức chính." },
@@ -47,7 +47,13 @@ export const analyzeProject = async (projectName: string, projectLinks: string, 
 
     if (isDeepSearch) {
         prompt = `Phân tích chuyên sâu dự án tiền điện tử có tên "${projectName}". Sử dụng Google Search để thu thập thông tin mới nhất và toàn diện nhất, kết hợp với các nguồn thông tin được cung cấp dưới đây:\n${projectLinks}\n\n**YÊU CẦU QUAN TRỌNG:**
-1.  **Thu thập dữ liệu định lượng:** Tìm kiếm các số liệu sau và đưa vào kết quả: Vốn hóa thị trường, Giá hiện tại, Khối lượng giao dịch 24h, Nguồn cung lưu hành, Tổng cung, và Giá cao nhất mọi thời đại (ATH). Nếu không tìm thấy một số liệu nào đó, hãy trả về giá trị là "Không có dữ liệu".
+1.  **Thu thập dữ liệu định lượng:** Tìm kiếm các số liệu sau. Hãy ưu tiên các nguồn dữ liệu chính thức như trang web của dự án, CoinMarketCap, CoinGecko. Nếu không tìm thấy một số liệu nào đó, hãy trả về giá trị là "Không có dữ liệu".
+    *   Vốn hóa thị trường.
+    *   Giá hiện tại.
+    *   Khối lượng giao dịch 24h.
+    *   Nguồn cung lưu hành.
+    *   Tổng cung: Phân biệt rõ ràng giữa **Tổng cung tối đa (Max Supply)** và **Tổng cung hiện tại (Total Supply)** nếu có thể. Ví dụ: "8 tỷ (Tối đa), 1.7 tỷ (Hiện tại)".
+    *   Giá cao nhất mọi thời đại (ATH).
 2.  **Phân tích định tính:** Cung cấp phân tích chi tiết về: Tình trạng, Điểm mạnh, Điểm yếu, Tiềm năng, Tiềm năng đầu tư, Rủi ro, Người sáng lập và Đội ngũ, Tokenomics, và Cộng đồng/Hệ sinh thái.
 3.  **Định dạng đầu ra:** Trả về toàn bộ phản hồi dưới dạng một đối tượng JSON hợp lệ duy nhất. JSON phải có hai khóa chính: "summary" và "fullReport".
     *   "fullReport": Chứa một phân tích chi tiết, sâu sắc và toàn diện cho MỌI mục (cả định lượng và định tính).
@@ -60,7 +66,13 @@ Cả "summary" và "fullReport" phải là các đối tượng có đầy đủ
         };
     } else {
         prompt = `Phân tích dự án tiền điện tử có tên "${projectName}". Hãy sử dụng tất cả các nguồn thông tin được cung cấp dưới đây:\n${projectLinks}\n\n**YÊU CẦU QUAN TRỌNG:**
-1.  **Thu thập dữ liệu định lượng:** Tìm kiếm các số liệu sau và đưa vào kết quả: Vốn hóa thị trường, Giá hiện tại, Khối lượng giao dịch 24h, Nguồn cung lưu hành, Tổng cung, và Giá cao nhất mọi thời đại (ATH). Nếu không tìm thấy một số liệu nào đó, hãy trả về giá trị là "Không có dữ liệu".
+1.  **Thu thập dữ liệu định lượng:** Tìm kiếm các số liệu sau. Ưu tiên các nguồn chính thức (trang web dự án, CoinMarketCap, CoinGecko). Nếu không tìm thấy, hãy trả về "Không có dữ liệu".
+    *   Vốn hóa thị trường.
+    *   Giá hiện tại.
+    *   Khối lượng giao dịch 24h.
+    *   Nguồn cung lưu hành.
+    *   Tổng cung: Phân biệt rõ ràng giữa **Tổng cung tối đa (Max Supply)** và **Tổng cung hiện tại (Total Supply)** nếu có thể.
+    *   Giá cao nhất mọi thời đại (ATH).
 2.  **Phân tích định tính:** Cung cấp một phân tích đầu tư ngắn gọn nhưng toàn diện về: Tình trạng, Điểm mạnh, Điểm yếu, Tiềm năng, Tiềm năng đầu tư (ví dụ: Cao, Trung bình, Thấp kèm giải thích), Rủi ro, Người sáng lập và Đội ngũ, Tokenomics, và Cộng đồng/Hệ sinh thái.
 
 ${schemaDescriptionForPrompt}`;
