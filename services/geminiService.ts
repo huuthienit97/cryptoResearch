@@ -1,6 +1,7 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { ProjectAnalysis, AnalysisDetails } from '../types';
+import { ProjectAnalysis, AnalysisDetails, GroundingSource } from '../types';
+import { GEMINI_API_KEY } from '../config';
 
 // Updated: Add new quantitative fields to the schema.
 const analysisSchemaProperties = {
@@ -33,12 +34,12 @@ const schemaDescriptionForPrompt = `QUAN TRỌNG: Trả về toàn bộ phản h
 
 
 export const analyzeProject = async (projectName: string, projectLinks: string, isDeepSearch: boolean): Promise<ProjectAnalysis> => {
-  if (!process.env.API_KEY) {
-    throw new Error("Vui lòng thiết lập Gemini API Key của bạn trong biến môi trường.");
+  if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("YOUR_GEMINI_API_KEY_HERE")) {
+    throw new Error("Vui lòng thiết lập Gemini API Key của bạn trong file config.ts.");
   }
   
   try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
     let prompt: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -86,7 +87,7 @@ ${schemaDescriptionForPrompt}`;
         const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks || [];
         const sources = groundingChunks
           .map(chunk => chunk.web)
-          .filter(source => source && source.uri && source.title);
+          .filter((source): source is GroundingSource => !!(source && source.uri && source.title));
         
         result = {
           ...parsedData.summary,
