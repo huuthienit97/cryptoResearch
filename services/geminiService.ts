@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { ProjectAnalysis } from '../types';
+import { GEMINI_API_KEY } from '../config';
 
 const analysisSchema = {
   type: Type.OBJECT,
@@ -18,11 +19,13 @@ const analysisSchema = {
   required: ["status", "projectName", "strengths", "weaknesses", "potential", "investmentPotential", "risks", "founderAndTeam", "tokenomics", "communityAndEcosystem"]
 };
 
-// Fix: Removed apiKey parameter and now using process.env.API_KEY as per guidelines.
 export const analyzeProject = async (projectName: string, projectLinks: string): Promise<ProjectAnalysis> => {
+  if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+    throw new Error("Vui lòng thiết lập Gemini API Key của bạn trong file `config.ts`.");
+  }
+  
   try {
-    // Fix: Initialize GoogleGenAI with API key from environment variables.
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+    const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
     const prompt = `Phân tích dự án tiền điện tử có tên "${projectName}". Hãy sử dụng tất cả các nguồn thông tin được cung cấp dưới đây:\n${projectLinks}\n\nCung cấp một phân tích đầu tư ngắn gọn nhưng toàn diện. Đánh giá các yếu tố sau: Tình trạng, Điểm mạnh, Điểm yếu, Tiềm năng, Tiềm năng đầu tư (ví dụ: Cao, Trung bình, Thấp kèm giải thích), Rủi ro, Người sáng lập và Đội ngũ, Tokenomics, và Cộng đồng/Hệ sinh thái. Trả về kết quả phân tích dưới dạng một đối tượng JSON duy nhất.`;
 
