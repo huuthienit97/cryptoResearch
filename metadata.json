@@ -1,0 +1,5 @@
+{
+  "name": "Phân Tích Dự Án Crypto",
+  "description": "Một ứng dụng để nghiên cứu các dự án tiền điện tử nhằm đánh giá tiềm năng đầu tư, tạo ra dữ liệu sẵn sàng cho Google Sheets.",
+  "requestFramePermissions": []
+}
