@@ -1,12 +1,14 @@
 import React from 'react';
 import { ProjectAnalysis } from '../types';
 import CopyButton from './CopyButton';
+import { TrashIcon } from './icons/TrashIcon';
 
 interface ResultsTableProps {
   results: ProjectAnalysis[];
+  onClearHistory: () => void;
 }
 
-const ResultsTable: React.FC<ResultsTableProps> = ({ results }) => {
+const ResultsTable: React.FC<ResultsTableProps> = ({ results, onClearHistory }) => {
   if (results.length === 0) {
     return (
       <div className="text-center py-10 px-4 bg-gray-800/30 rounded-2xl border border-gray-700/50">
@@ -39,7 +41,17 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ results }) => {
     <div className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-2xl border border-gray-700">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-white">Kết quả phân tích</h2>
-        <CopyButton data={results} headers={copyHeaders} />
+        <div className="flex items-center gap-2">
+            <CopyButton data={results} headers={copyHeaders} />
+            <button
+                onClick={onClearHistory}
+                className="inline-flex items-center px-3 py-2 border border-gray-600 text-sm font-medium rounded-md text-red-400 bg-gray-700 hover:bg-red-900/50 hover:border-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-red-500 transition-colors duration-200"
+                title="Xóa lịch sử phân tích"
+            >
+                <TrashIcon className="h-4 w-4 mr-1.5" />
+                <span>Xóa Lịch sử</span>
+            </button>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-700 table-fixed">

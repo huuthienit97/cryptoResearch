@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ProjectAnalysis, SelectedSheet } from './types';
 import { analyzeProject } from './services/geminiService';
@@ -10,6 +9,8 @@ import ApiKeyInput from './components/ApiKeyInput';
 import ResultsTable from './components/ResultsTable';
 import Loader from './components/Loader';
 import GoogleSheetConnector from './components/GoogleSheetConnector';
+
+const HISTORY_KEY = 'cryptoAnalysisHistory';
 
 const App: React.FC = () => {
   const [analysisResults, setAnalysisResults] = useState<ProjectAnalysis[]>([]);
@@ -32,6 +33,17 @@ const App: React.FC = () => {
     else if (GEMINI_API_KEY) {
       setGeminiApiKey(GEMINI_API_KEY);
       setIsKeyFromConfig(true);
+    }
+    
+    // Tải lịch sử phân tích đã lưu
+    try {
+      const savedResults = localStorage.getItem(HISTORY_KEY);
+      if (savedResults) {
+        setAnalysisResults(JSON.parse(savedResults));
+      }
+    } catch (error) {
+      console.error("Could not load analysis history:", error);
+      localStorage.removeItem(HISTORY_KEY);
     }
   }, []);
 
@@ -83,7 +95,11 @@ const App: React.FC = () => {
 
     try {
       const result = await analyzeProject(projectName, projectLink, geminiApiKey);
-      setAnalysisResults(prevResults => [result, ...prevResults]);
+      
+      // Cập nhật state và lưu vào localStorage
+      const updatedResults = [result, ...analysisResults];
+      setAnalysisResults(updatedResults);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(updatedResults));
 
       if (selectedSheet) {
         await handleAppendToSheet(result, selectedSheet.id);
@@ -93,6 +109,13 @@ const App: React.FC = () => {
       setError(err instanceof Error ? err.message : 'Đã xảy ra lỗi không xác định. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleClearHistory = () => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa toàn bộ lịch sử phân tích không? Thao tác này không thể hoàn tác.')) {
+      setAnalysisResults([]);
+      localStorage.removeItem(HISTORY_KEY);
     }
   };
 
@@ -138,7 +161,7 @@ const App: React.FC = () => {
 
           {isLoading && <Loader />}
           
-          <ResultsTable results={analysisResults} />
+          <ResultsTable results={analysisResults} onClearHistory={handleClearHistory} />
 
         </main>
       </div>
