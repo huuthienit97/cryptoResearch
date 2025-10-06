@@ -1,7 +1,9 @@
 import React from 'react';
 import { ProjectAnalysis } from '../types';
 import CopyButton from './CopyButton';
+import ExportButton from './ExportButton';
 import { TrashIcon } from './icons/TrashIcon';
+import { LinkIcon } from './icons/LinkIcon';
 
 interface ResultsTableProps {
   results: ProjectAnalysis[];
@@ -19,21 +21,22 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ results, onClearHistory }) 
   }
 
   const copyHeaders = [
-    "Status", "Project Name", "Strengths", "Weaknesses", "Potential", 
+    "Status", "Project Name", "Market Cap", "Current Price", "24h Volume", 
+    "Circulating Supply", "Total Supply", "ATH", "Strengths", "Weaknesses", "Potential", 
     "Investment Potential", "Risks", "Founder and Team", "Tokenomics", "Community and Ecosystem"
   ];
 
   const displayHeaders = [
-    { title: "Tình trạng", width: "8%" },
     { title: "Tên dự án", width: "12%" },
-    { title: "Điểm mạnh", width: "10%" },
-    { title: "Điểm yếu", width: "10%" },
-    { title: "Tiềm năng", width: "10%" },
+    { title: "Vốn hóa TT", width: "10%" },
+    { title: "Giá", width: "8%" },
     { title: "Tiềm năng ĐT", width: "10%" },
-    { title: "Rủi ro", width: "10%" },
+    { title: "Điểm mạnh", width: "12%" },
+    { title: "Điểm yếu", width: "12%" },
+    { title: "Rủi ro", width: "12%" },
     { title: "Đội ngũ", width: "10%" },
-    { title: "Tokenomics", width: "10%" },
-    { title: "Cộng đồng", width: "10%" }
+    { title: "Tokenomics", width: "9%" },
+    { title: "Thao tác", width: "5%" }
   ];
 
 
@@ -72,16 +75,41 @@ const ResultsTable: React.FC<ResultsTableProps> = ({ results, onClearHistory }) 
           <tbody className="bg-gray-800 divide-y divide-gray-700">
             {results.map((result, index) => (
               <tr key={index} className="hover:bg-gray-700/50 transition-colors duration-200">
-                <td className="px-6 py-4 align-top text-sm font-medium text-blue-400 break-words">{result.status}</td>
-                <td className="px-6 py-4 align-top text-sm font-semibold text-white break-words">{result.projectName}</td>
+                <td className="px-6 py-4 align-top text-sm font-semibold text-white break-words">
+                  <div className="flex items-center gap-2">
+                    <div className="flex flex-col">
+                      <span className="font-bold">{result.projectName}</span>
+                      <span className="text-xs text-blue-400">{result.status}</span>
+                    </div>
+                    {result.sources && result.sources.length > 0 && (
+                      <div className="relative group flex-shrink-0">
+                        <LinkIcon className="h-4 w-4 text-blue-400" />
+                        <div className="absolute bottom-full mb-2 w-72 bg-gray-900 border border-gray-600 text-white text-xs rounded-lg p-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 -translate-x-1/2 left-1/2">
+                          <h4 className="font-bold mb-1">Nguồn Deep Search:</h4>
+                          <ul className="list-disc list-inside space-y-1">
+                            {result.sources.map((source, i) => (
+                              <li key={i} className="truncate">
+                                <a href={source.uri} target="_blank" rel="noopener noreferrer" className="hover:underline" title={source.title}>{source.title}</a>
+                              </li>
+                            ))}
+                          </ul>
+                          <div className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 border-b border-r border-gray-600 transform rotate-45"></div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </td>
+                <td className="px-6 py-4 align-top text-sm text-gray-300 whitespace-pre-wrap break-words">{result.marketCap}</td>
+                <td className="px-6 py-4 align-top text-sm text-gray-300 whitespace-pre-wrap break-words">{result.currentPrice}</td>
+                <td className="px-6 py-4 align-top text-sm font-medium text-green-400 whitespace-pre-wrap break-words">{result.investmentPotential}</td>
                 <td className="px-6 py-4 align-top text-sm text-gray-300 whitespace-pre-wrap break-words">{result.strengths}</td>
                 <td className="px-6 py-4 align-top text-sm text-gray-300 whitespace-pre-wrap break-words">{result.weaknesses}</td>
-                <td className="px-6 py-4 align-top text-sm text-gray-300 whitespace-pre-wrap break-words">{result.potential}</td>
-                <td className="px-6 py-4 align-top text-sm font-medium text-green-400 whitespace-pre-wrap break-words">{result.investmentPotential}</td>
                 <td className="px-6 py-4 align-top text-sm text-gray-300 whitespace-pre-wrap break-words">{result.risks}</td>
                 <td className="px-6 py-4 align-top text-sm text-gray-300 whitespace-pre-wrap break-words">{result.founderAndTeam}</td>
                 <td className="px-6 py-4 align-top text-sm text-gray-300 whitespace-pre-wrap break-words">{result.tokenomics}</td>
-                <td className="px-6 py-4 align-top text-sm text-gray-300 whitespace-pre-wrap break-words">{result.communityAndEcosystem}</td>
+                <td className="px-6 py-4 align-top text-sm text-center">
+                    <ExportButton project={result} />
+                </td>
               </tr>
             ))}
           </tbody>

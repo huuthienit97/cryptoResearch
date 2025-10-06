@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ProjectAnalysis } from '../types';
 import { ClipboardIcon } from './icons/ClipboardIcon';
@@ -20,6 +19,12 @@ const CopyButton: React.FC<CopyButtonProps> = ({ data, headers }) => {
       [
         sanitize(row.status),
         sanitize(row.projectName),
+        sanitize(row.marketCap),
+        sanitize(row.currentPrice),
+        sanitize(row.volume24h),
+        sanitize(row.circulatingSupply),
+        sanitize(row.totalSupply),
+        sanitize(row.ath),
         sanitize(row.strengths),
         sanitize(row.weaknesses),
         sanitize(row.potential),

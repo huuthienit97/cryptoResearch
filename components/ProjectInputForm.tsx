@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 
 interface ProjectInputFormProps {
-  onAnalyze: (projectName: string, projectLink: string) => void;
+  onAnalyze: (projectName: string, projectLink: string, isDeepSearch: boolean) => void;
   isLoading: boolean;
 }
 
 const ProjectInputForm: React.FC<ProjectInputFormProps> = ({ onAnalyze, isLoading }) => {
   const [projectName, setProjectName] = useState('');
   const [projectLinks, setProjectLinks] = useState('');
+  const [isDeepSearch, setIsDeepSearch] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onAnalyze(projectName, projectLinks);
+    onAnalyze(projectName, projectLinks, isDeepSearch);
   };
 
   return (
@@ -46,7 +47,19 @@ const ProjectInputForm: React.FC<ProjectInputFormProps> = ({ onAnalyze, isLoadin
           />
         </div>
       </div>
-      <div className="flex justify-center">
+      <div className="flex flex-col items-center justify-center gap-4">
+        <div className="relative flex items-center">
+          <input
+            id="deep-search-checkbox"
+            type="checkbox"
+            checked={isDeepSearch}
+            onChange={(e) => setIsDeepSearch(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-500 bg-gray-700 text-blue-500 focus:ring-blue-600"
+          />
+          <label htmlFor="deep-search-checkbox" className="ml-2 block text-sm text-gray-300">
+            Phân tích chuyên sâu (Sử dụng Google Search, chậm hơn)
+          </label>
+        </div>
         <button
           type="submit"
           disabled={isLoading}

@@ -26,7 +26,7 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const handleAnalyze = async (projectName: string, projectLink: string) => {
+  const handleAnalyze = async (projectName: string, projectLink: string, isDeepSearch: boolean) => {
     if (!projectName.trim() || !projectLink.trim()) {
       setError('Vui lòng nhập Tên dự án và Liên kết dự án.');
       return;
@@ -37,7 +37,7 @@ const App: React.FC = () => {
 
     try {
       // Fix: API key is now handled by geminiService using environment variables.
-      const result = await analyzeProject(projectName, projectLink);
+      const result = await analyzeProject(projectName, projectLink, isDeepSearch);
       
       // Cập nhật state và lưu vào localStorage
       const updatedResults = [result, ...analysisResults];
